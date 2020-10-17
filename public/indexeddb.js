@@ -35,6 +35,26 @@ function saveRecord(transaction) {
         var allRecords = store.getAll();
         allRecords.onsuccess = function() {
             console.log("allRecords.result = ", allRecords.result);
+            window.addEventListener('online', function(e) { 
+                console.log('online'); 
+                console.log("in navigator.online");
+                allRecords.result.forEach(record => {
+                    let recordkey = record.getKey()
+                    console.log("recordkey = " + recordkey);    
+                    sendOfflineTransaction(recordkey,record);
+              });
+              });
             return (allRecords.result);
         };
   }
+
+  function deleteRecord(i) {
+    console.log("in deleteRecord = " + i);
+    var tx = db.transaction('record', 'readwrite');
+    var store = tx.objectStore('record');
+    var delRecord = store.delete(i+1);
+    delRecord.onsuccess = function() {
+        console.log("Delete Record complete");
+        return;
+    };
+}

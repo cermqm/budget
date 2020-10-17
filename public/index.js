@@ -10,11 +10,22 @@ fetch("/api/transaction")
   })
   .then(data => {
     transactions = data;
-    console.log("data = ", data);
+    console.log("*** data *** = ", data);
     retrieveRecords(records)
-  })
+    window.addEventListener('offline', function(e) { 
+      console.log('offline'); 
+    });
+
+    })
     .then(records => {
     console.log("records = ", records)
+    // window.addEventListener('online', function(e) { 
+    //   console.log('online'); 
+    //   console.log("in navigator.online");
+    //   records.forEach(record => {
+    //     sendOfflineTransaction(record);
+    // });
+    // });
    
     // save db data on global variable
 
@@ -153,6 +164,61 @@ function sendTransaction(isAdding) {
     amountEl.value = "";
   });
 }
+
+
+function sendOfflineTransaction(i,record) {
+  console.log("i = " + i);
+  console.log("record = ", record);
+  let name = record.name;
+  let amount = record.value;
+  let transdate = record.date;
+  console.log("name = " + name);
+  console.log("amount = " + amount);
+
+  // validate record
+  if (name === "" || amount === "") {
+    console.log("Missing Information");
+    return;
+  }
+
+  // create record
+  let transaction = {
+    name: name,
+    value: amount,
+    date: transdate
+  };
+
+  // add to beginning of current array of data
+  transactions.unshift(transaction);
+
+  // re-run logic to populate ui with new record
+  populateChart();
+  populateTable();
+  populateTotal();
+  
+  // also send to server
+  fetch("/api/transaction", {
+    method: "POST",
+    body: JSON.stringify(transaction),
+    headers: {
+      Accept: "application/json, text/plain, */*",
+      "Content-Type": "application/json"
+    }
+  })
+  .then(response => {    
+    return response.json();
+  })
+  .then(data => {
+    if (data.errors) {
+      console.log("Missing Information");
+    }
+    else {
+      // delete record from indexeddb
+      deleteRecord(i);
+    }
+  })
+}
+
 
 document.querySelector("#add-btn").onclick = function() {
   sendTransaction(true);
