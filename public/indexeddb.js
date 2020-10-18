@@ -1,5 +1,11 @@
 let db;
 let dbReq = indexedDB.open('budgetDatabase', 1);
+var tx;
+var store;
+var allRecords;
+var allKeys;
+var record;
+
 dbReq.onupgradeneeded = function(event) {
   // Set the db variable to our database so we can use it!  
   db = event.target.result;
@@ -29,33 +35,63 @@ function saveRecord(transaction) {
     }
   }
 
-  function retrieveRecords(records) {
-        var tx = db.transaction('record', 'readonly');
-        var store = tx.objectStore('record');
-        var allRecords = store.getAll();
-        allRecords.onsuccess = function() {
-            console.log("allRecords = ", allRecords);
-            console.log("allRecords.result = ", allRecords.result);
-            window.addEventListener('online', function(e) { 
-                console.log('online'); 
-                console.log("in navigator.online");
-                //var i = 0;
-                allRecords.result.forEach((record, i)=> {
-                    console.log("record = ", record);
-                    let recordkey = record.getKey(i);
-                    console.log("recordkey = " + recordkey);    
-                    sendOfflineTransaction(recordkey,record);
-                    //i++
-              });
-              });
-            return (allRecords.result);
+
+window.addEventListener('offline', function(e) { 
+console.log('offline'); 
+});
+
+// window.addEventListener('load', function(e) {
+//     console.log("in window load event");
+//     tx = db.transaction(['record'], 'readonly');
+//     store = tx.objectStore('record');
+//     allRecords = store.getAll();
+//     allKeys = store.getAllKeys();
+//     allRecords.onsuccess = function() {
+//         allKeys.onsuccess = function() {
+//         console.log("allRecords = ", allRecords);
+//         console.log("allKeys = ", allKeys);
+//         console.log("allRecords.result = ", allRecords.result);
+//         console.log('online'); 
+//         console.log("in navigator.online");
+//         allRecords.result.forEach((record, i)=> {
+//             console.log("i in eventlistener = " + i);
+//             console.log("record = ", record);
+//             let recordkey = allKeys.result[i];
+//             console.log("recordkey = " + recordkey);
+//             sendofflineTransaction(recordkey,record);
+//         });
+//         };
+//     };  
+// });
+
+window.addEventListener('online', function(e) { 
+    console.log("in add event listener");
+    tx = db.transaction('record', 'readonly');
+    store = tx.objectStore('record');
+    allRecords = store.getAll();
+    allKeys = store.getAllKeys();
+    allRecords.onsuccess = function() {
+        allKeys.onsuccess = function() {
+        console.log("allRecords = ", allRecords);
+        console.log("allKeys = ", allKeys);
+        console.log("allRecords.result = ", allRecords.result);
+        console.log('online'); 
+        console.log("in navigator.online");
+        allRecords.result.forEach((record, i)=> {
+            console.log("i in eventlistener = " + i);
+            console.log("record = ", record);
+            let recordkey = allKeys.result[i];
+            console.log("recordkey = " + recordkey);
+            sendOfflineTransaction(recordkey,record);
+        });
         };
-  }
+    };
+});
 
   function deleteRecord(i) {
     console.log("in deleteRecord = " + i);
-    var tx = db.transaction('record', 'readwrite');
-    var store = tx.objectStore('record');
+    tx = db.transaction('record', 'readwrite');
+    store = tx.objectStore('record');
     var delRecord = store.delete(i);
     delRecord.onsuccess = function() {
         console.log("Delete Record complete");

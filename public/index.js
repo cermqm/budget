@@ -11,24 +11,11 @@ fetch("/api/transaction")
   .then(data => {
     transactions = data;
     console.log("*** data *** = ", data);
-    retrieveRecords(records)
-    window.addEventListener('offline', function(e) { 
-      console.log('offline'); 
-    });
+    // retrieveRecords()
 
     })
     .then(records => {
     console.log("records = ", records)
-    // window.addEventListener('online', function(e) { 
-    //   console.log('online'); 
-    //   console.log("in navigator.online");
-    //   records.forEach(record => {
-    //     sendOfflineTransaction(record);
-    // });
-    // });
-   
-    // save db data on global variable
-
     populateTotal();
     populateTable();
     populateChart();
@@ -167,7 +154,7 @@ function sendTransaction(isAdding) {
 
 
 function sendOfflineTransaction(i,record) {
-  console.log("i = " + i);
+  console.log("i in sendofflinetransaction = " + i);
   console.log("record = ", record);
   let name = record.name;
   let amount = record.value;
