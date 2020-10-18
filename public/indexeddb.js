@@ -34,14 +34,18 @@ function saveRecord(transaction) {
         var store = tx.objectStore('record');
         var allRecords = store.getAll();
         allRecords.onsuccess = function() {
+            console.log("allRecords = ", allRecords);
             console.log("allRecords.result = ", allRecords.result);
             window.addEventListener('online', function(e) { 
                 console.log('online'); 
                 console.log("in navigator.online");
-                allRecords.result.forEach(record => {
-                    let recordkey = record.getKey()
+                //var i = 0;
+                allRecords.result.forEach((record, i)=> {
+                    console.log("record = ", record);
+                    let recordkey = record.getKey(i);
                     console.log("recordkey = " + recordkey);    
                     sendOfflineTransaction(recordkey,record);
+                    //i++
               });
               });
             return (allRecords.result);
@@ -52,7 +56,7 @@ function saveRecord(transaction) {
     console.log("in deleteRecord = " + i);
     var tx = db.transaction('record', 'readwrite');
     var store = tx.objectStore('record');
-    var delRecord = store.delete(i+1);
+    var delRecord = store.delete(i);
     delRecord.onsuccess = function() {
         console.log("Delete Record complete");
         return;
